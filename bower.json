@@ -1,0 +1,26 @@
+{
+  "name": "touch_div",
+  "description": "touch div",
+  "main": "",
+  "authors": [
+    "chen8840"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "mobile",
+    "div",
+    "touch"
+  ],
+  "homepage": "https://github.com/chen8840/TouchDiv",
+  "moduleType": [
+    "amd",
+    "globals"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
