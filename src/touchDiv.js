@@ -89,6 +89,9 @@
 			changDiv();
 			changeScrollBarY();
 			changeScrollBarX();
+			if(options.scrollDivTouchMove) {
+				options.scrollDivTouchMove();
+			}
 			var now = new Date();
 			if(_t !== undefined && (now - _t !== 0)) {
 				//	console.log(new Date() - t);
@@ -170,12 +173,18 @@
 			}
 			if(translateY > 0) {
 				translateY = 0;
+				if(options.scrollDivToTop) {
+					options.scrollDivToTop();
+				}
 			}
 			if(translateX < -(tDiv.scrollWidth - tDiv.clientWidth)) {
 				translateX = -(tDiv.scrollWidth - tDiv.clientWidth);
 			}
 			if(translateY < -(tDiv.scrollHeight - div.clientHeight)) {
 				translateY = -(tDiv.scrollHeight - div.clientHeight);
+				if(options.scrollDivToBottom) {
+					options.scrollDivToBottom();
+				}
 			}
 			if(originTY != translateY || originTX != translateX) {
 				tDiv.style.transform = 'translate3d(' + translateX + 'px,' + translateY + 'px,0px)';
