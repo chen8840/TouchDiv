@@ -1,6 +1,6 @@
 (function() {
 	'use strict';
-	window.touchDiv = function(div) {
+	window.touchDiv = function(div, options) {
 		if(div.nodeType != 1 || div.tagName.toLowerCase() != 'div') {
 			console.warn('touchDiv\'s param is not a div element.');
 		}
@@ -13,6 +13,9 @@
 		tDiv.innerHTML = div.innerHTML;
 		div.innerHTML = '';
 		div.appendChild(tDiv);
+		if(tDiv.offsetHeight < div.clientHeight) {
+			tDiv.style.height = "100%";
+		}
 
 		//setup vertical navigation bar
 		var scrollBarY = document.createElement('div');
@@ -41,7 +44,11 @@
 		//add touch event
 		var lastx,lasty,delx,dely,_t,_v=[],easeTimer,_hasStarted;
 		var translateX = 0,
-			translateY = 0;
+			translateY = 0,
+			startAtTop,
+			endAtTop,
+			startAtBottom,
+			endAtBottom;
 		createTouchEvent(div,'touchstart', function(event, x, y) {
 			if(is_weixin()) {
 				event.preventDefault();
@@ -55,16 +62,23 @@
 			lasty = y;
 			scrollBarY.style.display = scrollBarX.style.display = 'block';
 			scrollBarY.style.opacity = scrollBarX.style.opacity = '0.8';
+			changeScrollBarY();
+			changeScrollBarX();
 			if(scrollBarY.clientHeight >= div.clientHeight) {
 				scrollBarY.style.display = 'none';
 			}
 			if(scrollBarX.clientWidth >= div.clientWidth) {
 				scrollBarX.style.display = 'none';
 			}
-			changeScrollBarY();
-			changeScrollBarX();
 			_t = undefined;
 			_v = [];
+			startAtTop = startAtBottom = endAtBottom = endAtTop = undefined;
+			if(-translateY <= 0) {
+				startAtTop = true;
+			}
+			if(-translateY + div.clientHeight >= div.scrollHeight) {
+				startAtBottom = true;
+			}
 		});
 		createTouchEvent(div,'touchmove', function(event, x, y) {
 			event.stopPropagation();
@@ -87,6 +101,22 @@
 		});
 		createTouchEvent(div,'touchend', function(event) {
 			event.stopPropagation();
+			if(-translateY <= 0) {
+				endAtTop = true;
+			}
+			if(-translateY + div.clientHeight >= div.scrollHeight) {
+				endAtBottom = true;
+			}
+			if(startAtTop && endAtTop && dely > 0) {
+				if(options.topToTopFunc) {
+					options.topToTopFunc();
+				}
+			}
+			if(startAtBottom && endAtBottom && dely < 0) {
+				if(options.buttomToButtomFunc) {
+					options.buttomToButtomFunc();
+				}
+			}
 			var tvX = 0,
 				tvY = 0,
 				fadeSrcollBarTime = 15;
@@ -98,7 +128,7 @@
 				tvX = tvX * 1000 / _v.length;
 				tvY = tvY * 1000 / _v.length;
 			}
-			if(Math.sqrt(delx*delx + dely*dely) < 8) {
+			if(Math.sqrt(delx*delx + dely*dely) < 5) {
 				tvX = tvY = 0;
 			}
 			easeTimer = setTimeout(ease,20);
@@ -124,6 +154,7 @@
 					easeTimer = setTimeout(ease,30);
 				} else {
 					scrollBarY.style.display = scrollBarX.style.display = 'none';
+					easeTimer = undefined;
 				}
 			}
 

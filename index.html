@@ -34,7 +34,14 @@
 		
 		<script src="src/touchDiv.js"></script>
 		<script>
-			touchDiv(document.getElementById("touchDiv"));
+			touchDiv(document.getElementById("touchDiv"), {
+				topToTopFunc: function() {
+					console.log(1);
+				},
+				buttomToButtomFunc: function() {
+					console.log(2);
+				}
+			});
 		</script>
 		
 </body>
