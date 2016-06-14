@@ -10,8 +10,15 @@
 
 		//setup inner translate div
 		var tDiv = document.createElement('div');
-		tDiv.innerHTML = div.innerHTML;
-		div.innerHTML = '';
+		if(document.implementation.hasFeature('Range', '2.0')) {
+			var range = document.createRange();
+			range.selectNodeContents(div);
+			var fragment = range.extractContents();
+			tDiv.appendChild(fragment);
+		} else {
+			tDiv.innerHTML = div.innerHTML;
+			div.innerHTML = '';
+		}
 		div.appendChild(tDiv);
 		if(tDiv.offsetHeight < div.clientHeight) {
 			tDiv.style.height = "100%";
@@ -62,6 +69,13 @@
 			lasty = y;
 			scrollBarY.style.display = scrollBarX.style.display = 'block';
 			scrollBarY.style.opacity = scrollBarX.style.opacity = '0.8';
+			if(tDiv.style.height !== '') {
+				var backup = tDiv.style.height;
+				tDiv.style.height = '';
+				if(tDiv.scrollHeight <= div.clientHeight) {
+					tDiv.style.height = backup;
+				}
+			}
 			changeScrollBarY();
 			changeScrollBarX();
 			if(scrollBarY.clientHeight >= div.clientHeight) {
@@ -76,7 +90,7 @@
 			if(-translateY <= 0) {
 				startAtTop = true;
 			}
-			if(-translateY + div.clientHeight >= div.scrollHeight) {
+			if(-translateY + tDiv.clientHeight >= tDiv.scrollHeight) {
 				startAtBottom = true;
 			}
 		});
@@ -86,12 +100,12 @@
 			dely = y - lasty;
 			lastx = x;
 			lasty = y;
-			changDiv();
-			changeScrollBarY();
-			changeScrollBarX();
 			if(options.scrollDivTouchMove) {
 				options.scrollDivTouchMove();
 			}
+			changDiv();
+			changeScrollBarY();
+			changeScrollBarX();
 			var now = new Date();
 			if(_t !== undefined && (now - _t !== 0)) {
 				//	console.log(new Date() - t);
@@ -178,10 +192,18 @@
 				}
 			}
 			if(translateX < -(tDiv.scrollWidth - tDiv.clientWidth)) {
-				translateX = -(tDiv.scrollWidth - tDiv.clientWidth);
+				if(tDiv.scrollWidth < tDiv.clientWidth) {
+					translateX = 0;	
+				} else {
+					translateX = -(tDiv.scrollWidth - tDiv.clientWidth);
+				}
 			}
 			if(translateY < -(tDiv.scrollHeight - div.clientHeight)) {
-				translateY = -(tDiv.scrollHeight - div.clientHeight);
+				if(tDiv.scrollHeight < div.clientHeight) {
+					translateY = 0;
+				} else {
+					translateY = -(tDiv.scrollHeight - div.clientHeight);
+				}
 				if(options.scrollDivToBottom) {
 					options.scrollDivToBottom();
 				}
